@@ -29,6 +29,124 @@ string hasData(string s) {
   return "";
 }
 
+int UnitTest() {
+
+  Tools tools;
+
+  bool bCorrect = false;
+
+  bCorrect = true;
+  VectorXd tempV(3);
+  vector<VectorXd> v1;
+  vector<VectorXd> v2;
+  v1.clear();
+  tempV << -10, -5 ,-3;
+  v1.push_back(tempV);
+  tempV << 9, -1 ,8;
+  v1.push_back(tempV);
+  tempV << 8, 7, -5;
+  v1.push_back(tempV);
+  tempV << -6, 9, 9;
+  v1.push_back(tempV);
+  tempV << -1, 0, 10;
+  v1.push_back(tempV);
+  tempV << 5, -5, 3;
+  v1.push_back(tempV);
+  tempV << 6, 3, 5;
+  v1.push_back(tempV);
+  tempV << 9, -2, 8;
+  v1.push_back(tempV);
+  tempV << -5, 2, -5;
+  v1.push_back(tempV);
+  tempV << 10, -3, -4;
+  v1.push_back(tempV);
+
+  v2.clear();
+  tempV << 3, -9, 2;
+  v2.push_back(tempV);
+  tempV << -10, 0, 7;
+  v2.push_back(tempV);
+  tempV << 5, 3, 0;
+  v2.push_back(tempV);
+  tempV << 5, -2, 2;
+  v2.push_back(tempV);
+  tempV << -9, -9, 8;
+  v2.push_back(tempV);
+  tempV << 5, -6, -4;
+  v2.push_back(tempV);
+  tempV << 2, 3, 0;
+  v2.push_back(tempV);
+  tempV << -9, -7, 5;
+  v2.push_back(tempV);
+  tempV << 1, 4, -7;
+  v2.push_back(tempV);
+  tempV << -7, -3, 0;
+  v2.push_back(tempV);
+
+  VectorXd tempRMSE = tools.CalculateRMSE(v1, v2);
+  std::cout << "Root mean square: " << tempRMSE << std::endl;
+  if (!((fabs(tempRMSE(0) - 11.785584) < 0.00001) &&
+        (fabs(tempRMSE(1) - 5.147815) < 0.00001) &&
+        (fabs(tempRMSE(2) - 4.549725) < 0.00001))) {
+      bCorrect = false;
+  }
+  if (bCorrect) {
+      std::cout << "Tools::CalculateRMSE is correct." << std::endl;
+  } else {
+      std::cout << "Tools::CalculateRMSE is wrong." << std::endl;
+  }
+
+  bCorrect = true;
+  VectorXd x_predicted(4);
+  MatrixXd Hj;
+  x_predicted << 0, 0, 0, 0;
+  Hj = tools.CalculateJacobian(x_predicted);
+  std::cout << "Hj:" << std::endl << Hj << std::endl;
+  if (!((fabs(Hj(0, 0)) < 0.00001) &&
+       (fabs(Hj(0, 1)) < 0.00001) &&
+       (fabs(Hj(0, 2)) < 0.00001) &&
+       (fabs(Hj(0, 3)) < 0.00001) &&
+       (fabs(Hj(1, 0)) < 0.00001) &&
+       (fabs(Hj(1, 1)) < 0.00001) &&
+       (fabs(Hj(1, 2)) < 0.00001) &&
+       (fabs(Hj(1, 3)) < 0.00001) &&
+       (fabs(Hj(2, 0)) < 0.00001) &&
+       (fabs(Hj(2, 1)) < 0.00001) &&
+       (fabs(Hj(2, 2)) < 0.00001) &&
+       (fabs(Hj(2, 3)) < 0.00001))) {
+    bCorrect = false;
+  }
+  x_predicted << 1, 2, 0.2, 0.5;
+  Hj = tools.CalculateJacobian(x_predicted);
+  std::cout << "Hj:" << std::endl << Hj << std::endl;
+  if (!((fabs(Hj(0, 0) - 0.447214) < 0.00001) &&
+       (fabs(Hj(0, 1) - 0.894427) < 0.00001) &&
+       (fabs(Hj(0, 2) - 0) < 0.00001) &&
+       (fabs(Hj(0, 3) - 0) < 0.00001) &&
+       (fabs(Hj(1, 0) - (-0.4)) < 0.00001) &&
+       (fabs(Hj(1, 1) - 0.2) < 0.00001) &&
+       (fabs(Hj(1, 2) - 0) < 0.00001) &&
+       (fabs(Hj(1, 3) - 0) < 0.00001) &&
+       (fabs(Hj(2, 0) - (-0.0178885)) < 0.00001) &&
+       (fabs(Hj(2, 1) - 0.00894427) < 0.00001) &&
+       (fabs(Hj(2, 2) - 0.447214) < 0.00001) &&
+       (fabs(Hj(2, 3) - 0.894427) < 0.00001))) {
+    bCorrect = false;
+  }
+
+  if (bCorrect) {
+      std::cout << "Tools::CalculateRMSE is correct." << std::endl;
+  } else {
+      std::cout << "Tools::CalculateRMSE is wrong." << std::endl;
+  }
+
+  return 0;
+}
+
+int main2() {
+  UnitTest();
+}
+
 int main() {
   uWS::Hub h;
 
@@ -169,4 +287,6 @@ int main() {
   }
   
   h.run();
+
+  return 0;
 }
