@@ -2,6 +2,7 @@
 #include <uWS/uWS.h>
 #include <iostream>
 #include "json.hpp"
+#include "FusionKF.h"
 #include "FusionEKF.h"
 #include "FusionUKF.h"
 #include "tools.h"
@@ -31,25 +32,40 @@ string hasData(string s) {
 }
 
 int main(int argc, char *argv[]) {
-
   bool bUseUKF = false;
+  bool bUseRadar = true;
+  bool bUseLaser = true;
   if (argc >= 2) {
-    if (0 == strncmp(argv[1], "EKF", 8)) {
-      std::cout << "Use Extended Kalman Filter." << std::endl;
+    if (0 == strncasecmp(argv[1], "EKF", 3)) {
       bUseUKF = false;
-    } else if (0 == strncmp(argv[1], "UKF", 8)) {
-      std::cout << "Use Unscented Kalman Filter." << std::endl;
+    } else if (0 == strncasecmp(argv[1], "UKF", 3)) {
       bUseUKF = true;
     }
   }
+  if (argc >= 3) {
+    if (0 == strncasecmp(argv[2], "Radar-Only", 8)) {
+      bUseLaser = false;
+    } else if (0 == strncasecmp(argv[2], "Laser-Only", 8)) {
+      bUseRadar = false;
+    }
+  }
+
+  if (bUseUKF) {
+    std::cout << "Using Unscented Kalman Filter and CTRV model." << std::endl;
+  } else {
+    std::cout << "Using Extended Kalman Filter." << std::endl;
+  }
+  std::cout << "Laser Measurement: " << (bUseLaser ? "Yes" : "No") << std::endl;
+  std::cout << "Radar Measurement: " << (bUseRadar ? "Yes" : "No") << std::endl;
+
   uWS::Hub h;
 
   // Create a Kalman Filter instance
-  FusionEKF* pFusionEKF;
+  FusionKF* pFusionKF;
   if (bUseUKF) {
-    pFusionEKF = new FusionUKF();
+    pFusionKF = new FusionUKF(bUseLaser, bUseRadar);
   } else {
-    pFusionEKF = new FusionEKF();
+    pFusionKF = new FusionEKF(bUseLaser, bUseRadar);
   }
 
   // used to compute the RMSE later
@@ -57,7 +73,7 @@ int main(int argc, char *argv[]) {
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
 
-  h.onMessage([pFusionEKF,&tools,&estimations,&ground_truth]
+  h.onMessage([pFusionKF,&tools,&estimations,&ground_truth]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -125,17 +141,17 @@ int main(int argc, char *argv[]) {
           ground_truth.push_back(gt_values);
           
           // Call ProcessMeasurement(meas_package) for Kalman filter
-          pFusionEKF->ProcessMeasurement(meas_package);       
+          pFusionKF->ProcessMeasurement(meas_package);       
 
           // Push the current estimated x,y positon from the Kalman filter's 
           //   state vector
 
           VectorXd estimate(4);
 
-          double p_x = pFusionEKF->GetPx();
-          double p_y = pFusionEKF->GetPy();
-          double v1  = pFusionEKF->GetVx();
-          double v2 = pFusionEKF->GetVy();
+          double p_x = pFusionKF->GetPx();
+          double p_y = pFusionKF->GetPy();
+          double v1 = pFusionKF->GetVx();
+          double v2 = pFusionKF->GetVy();
 
           estimate(0) = p_x;
           estimate(1) = p_y;

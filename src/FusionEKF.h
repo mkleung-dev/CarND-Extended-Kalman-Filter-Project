@@ -7,14 +7,15 @@
 #include "Eigen/Dense"
 #include "kalman_filter.h"
 #include "measurement_package.h"
+#include "FusionKF.h"
 #include "tools.h"
 
-class FusionEKF {
+class FusionEKF : public FusionKF {
  public:
   /**
    * Constructor.
    */
-  FusionEKF();
+  FusionEKF(bool bUseLaser, bool bUseRadar);
 
   /**
    * Destructor.

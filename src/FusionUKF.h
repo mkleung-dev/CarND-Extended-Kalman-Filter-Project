@@ -7,15 +7,15 @@
 #include "Eigen/Dense"
 #include "unscented_kalman_filter.h"
 #include "measurement_package.h"
-#include "FusionEKF.h"
+#include "FusionKF.h"
 #include "tools.h"
 
-class FusionUKF : public FusionEKF {
+class FusionUKF : public FusionKF {
  public:
   /**
    * Constructor.
    */
-  FusionUKF();
+  FusionUKF(bool bUseLaser, bool bUseRadar);
 
   /**
    * Destructor.
@@ -53,12 +53,6 @@ class FusionUKF : public FusionEKF {
   UnscentedKalmanFilter ukf_;
 
  private:
-  // check whether the tracking toolbox was initialized or not (first measurement)
-  bool is_initialized_;
-
-  // previous timestamp
-  long long previous_timestamp_;
-
   // tool object used to compute Jacobian and RMSE
   Tools tools;
   Eigen::MatrixXd R_laser_;

@@ -272,6 +272,7 @@ void UnscentedKalmanFilter::UpdateByRadarMeasurement(const VectorXd &z) {
     }
     matrixWeight(nCol, nCol) = weights(nCol);
   }
+
   Tc = x_diff * matrixWeight * z_diff.transpose();
 
   z_diff = z - z_pred;

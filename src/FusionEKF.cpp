@@ -12,10 +12,7 @@ using std::vector;
 /**
  * Constructor.
  */
-FusionEKF::FusionEKF() {
-  is_initialized_ = false;
-
-  previous_timestamp_ = 0;
+FusionEKF::FusionEKF(bool bUseLaser, bool bUseRadar) : FusionKF(bUseLaser, bUseRadar) {
 
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
@@ -33,8 +30,8 @@ FusionEKF::FusionEKF() {
               0, 0, 0.09;
 
   /**
-   * TODO: Finish initializing the FusionEKF.
-   * TODO: Set the process and measurement noises
+   * Finish initializing the FusionEKF.
+   * Set the process and measurement noises
    */
   ekf_ = KalmanFilter();
   H_laser_ << 1, 0, 0, 0,
@@ -58,7 +55,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      */
 
     // first measurement
-    cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
 
@@ -87,6 +83,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
+    return;
+  }
+  if (!bUseRadar_ && measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    return;
+  }
+  if (!bUseLaser_ && measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
     return;
   }
 
@@ -142,8 +144,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   previous_timestamp_ = measurement_pack.timestamp_;
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  cout << "x_ = " << endl << ekf_.x_ << endl;
+  cout << "P_ = " << endl << ekf_.P_ << endl;
 }
 
 /**

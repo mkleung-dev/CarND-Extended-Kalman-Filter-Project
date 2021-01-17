@@ -12,11 +12,7 @@ using std::vector;
 /**
  * Constructor.
  */
-FusionUKF::FusionUKF() {
-  is_initialized_ = false;
-
-  previous_timestamp_ = 0;
-
+FusionUKF::FusionUKF(bool bUseLaser, bool bUseRadar) : FusionKF(bUseLaser, bUseRadar) {
   // initializing matrices
   R_laser_ = MatrixXd(2, 2);
   R_radar_ = MatrixXd(3, 3);
@@ -35,6 +31,16 @@ FusionUKF::FusionUKF() {
    * Set the process and measurement noises
    */
   ukf_ = UnscentedKalmanFilter();
+  /**
+   * Proces Noise Q (2 x 2):
+   * longitudinal acceleration noise,                      0
+   *                               0, yaw acceleration noise
+   * longitudinal acceleration noise: Range +- 4 m/s^2
+   * yaw acceleration noise: Range +- 0.6 rad/s^2
+   */
+  ukf_.Q_ = MatrixXd(2, 2);
+  ukf_.Q_ << 4,    0,
+             0, 0.09;
 }
 
 /**
@@ -54,8 +60,6 @@ void FusionUKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      */
 
     // first measurement
-    cout << "UKF: " << endl;
-
     // px, py, velocity, angle, angular velocity;
     ukf_.x_ = VectorXd(5);
     ukf_.x_ << 1, 1, 1, 1, 1;
@@ -90,6 +94,12 @@ void FusionUKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     is_initialized_ = true;
     return;
   }
+  if (!bUseRadar_ && measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    return;
+  }
+  if (!bUseLaser_ && measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
+    return;
+  }
 
   /**
    * Prediction
@@ -104,15 +114,6 @@ void FusionUKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
   ukf_.delta_t_ = dt;
 
-  /**
-   * Proces Noise Q (2 x 2):
-   * longitudinal acceleration noise,                      0
-   *                               0, yaw acceleration noise
-   * longitudinal acceleration noise: Range +- 2.82 m/s^2
-   */
-  ukf_.Q_ = MatrixXd(2, 2);
-  ukf_.Q_ << 4,    0,
-             0, 0.09;
   ukf_.Predict();
 
   /**
