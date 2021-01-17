@@ -1,25 +1,26 @@
-#ifndef FusionEKF_H_
-#define FusionEKF_H_
+#ifndef FusionUKF_H_
+#define FusionUKF_H_
 
 #include <fstream>
 #include <string>
 #include <vector>
 #include "Eigen/Dense"
-#include "kalman_filter.h"
+#include "unscented_kalman_filter.h"
 #include "measurement_package.h"
+#include "FusionEKF.h"
 #include "tools.h"
 
-class FusionEKF {
+class FusionUKF : public FusionEKF {
  public:
   /**
    * Constructor.
    */
-  FusionEKF();
+  FusionUKF();
 
   /**
    * Destructor.
    */
-  virtual ~FusionEKF();
+  virtual ~FusionUKF();
 
   /**
    * Run the whole flow of the Kalman Filter from here.
@@ -40,7 +41,7 @@ class FusionEKF {
    * Return the estimated velocity x.
    */
   virtual float GetVx();
-
+  
   /**
    * Return the estimated velocity y.
    */
@@ -49,7 +50,7 @@ class FusionEKF {
   /**
    * Kalman Filter update and prediction math lives in here.
    */
-  KalmanFilter ekf_;
+  UnscentedKalmanFilter ukf_;
 
  private:
   // check whether the tracking toolbox was initialized or not (first measurement)
@@ -66,4 +67,4 @@ class FusionEKF {
   Eigen::MatrixXd Hj_;
 };
 
-#endif // FusionEKF_H_
+#endif // FusionUKF_H_

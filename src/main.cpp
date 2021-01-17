@@ -3,6 +3,7 @@
 #include <iostream>
 #include "json.hpp"
 #include "FusionEKF.h"
+#include "FusionUKF.h"
 #include "tools.h"
 
 using Eigen::MatrixXd;
@@ -29,136 +30,34 @@ string hasData(string s) {
   return "";
 }
 
-int UnitTest() {
+int main(int argc, char *argv[]) {
 
-  Tools tools;
-
-  bool bCorrect = false;
-
-  bCorrect = true;
-  VectorXd tempV(3);
-  vector<VectorXd> v1;
-  vector<VectorXd> v2;
-  v1.clear();
-  tempV << -10, -5 ,-3;
-  v1.push_back(tempV);
-  tempV << 9, -1 ,8;
-  v1.push_back(tempV);
-  tempV << 8, 7, -5;
-  v1.push_back(tempV);
-  tempV << -6, 9, 9;
-  v1.push_back(tempV);
-  tempV << -1, 0, 10;
-  v1.push_back(tempV);
-  tempV << 5, -5, 3;
-  v1.push_back(tempV);
-  tempV << 6, 3, 5;
-  v1.push_back(tempV);
-  tempV << 9, -2, 8;
-  v1.push_back(tempV);
-  tempV << -5, 2, -5;
-  v1.push_back(tempV);
-  tempV << 10, -3, -4;
-  v1.push_back(tempV);
-
-  v2.clear();
-  tempV << 3, -9, 2;
-  v2.push_back(tempV);
-  tempV << -10, 0, 7;
-  v2.push_back(tempV);
-  tempV << 5, 3, 0;
-  v2.push_back(tempV);
-  tempV << 5, -2, 2;
-  v2.push_back(tempV);
-  tempV << -9, -9, 8;
-  v2.push_back(tempV);
-  tempV << 5, -6, -4;
-  v2.push_back(tempV);
-  tempV << 2, 3, 0;
-  v2.push_back(tempV);
-  tempV << -9, -7, 5;
-  v2.push_back(tempV);
-  tempV << 1, 4, -7;
-  v2.push_back(tempV);
-  tempV << -7, -3, 0;
-  v2.push_back(tempV);
-
-  VectorXd tempRMSE = tools.CalculateRMSE(v1, v2);
-  std::cout << "Root mean square: " << tempRMSE << std::endl;
-  if (!((fabs(tempRMSE(0) - 11.785584) < 0.00001) &&
-        (fabs(tempRMSE(1) - 5.147815) < 0.00001) &&
-        (fabs(tempRMSE(2) - 4.549725) < 0.00001))) {
-      bCorrect = false;
+  bool bUseUKF = false;
+  if (argc >= 2) {
+    if (0 == strncmp(argv[1], "EKF", 8)) {
+      std::cout << "Use Extended Kalman Filter." << std::endl;
+      bUseUKF = false;
+    } else if (0 == strncmp(argv[1], "UKF", 8)) {
+      std::cout << "Use Unscented Kalman Filter." << std::endl;
+      bUseUKF = true;
+    }
   }
-  if (bCorrect) {
-      std::cout << "Tools::CalculateRMSE is correct." << std::endl;
-  } else {
-      std::cout << "Tools::CalculateRMSE is wrong." << std::endl;
-  }
-
-  bCorrect = true;
-  VectorXd x_predicted(4);
-  MatrixXd Hj;
-  x_predicted << 0, 0, 0, 0;
-  Hj = tools.CalculateJacobian(x_predicted);
-  std::cout << "Hj:" << std::endl << Hj << std::endl;
-  if (!((fabs(Hj(0, 0)) < 0.00001) &&
-       (fabs(Hj(0, 1)) < 0.00001) &&
-       (fabs(Hj(0, 2)) < 0.00001) &&
-       (fabs(Hj(0, 3)) < 0.00001) &&
-       (fabs(Hj(1, 0)) < 0.00001) &&
-       (fabs(Hj(1, 1)) < 0.00001) &&
-       (fabs(Hj(1, 2)) < 0.00001) &&
-       (fabs(Hj(1, 3)) < 0.00001) &&
-       (fabs(Hj(2, 0)) < 0.00001) &&
-       (fabs(Hj(2, 1)) < 0.00001) &&
-       (fabs(Hj(2, 2)) < 0.00001) &&
-       (fabs(Hj(2, 3)) < 0.00001))) {
-    bCorrect = false;
-  }
-  x_predicted << 1, 2, 0.2, 0.5;
-  Hj = tools.CalculateJacobian(x_predicted);
-  std::cout << "Hj:" << std::endl << Hj << std::endl;
-  if (!((fabs(Hj(0, 0) - 0.447214) < 0.00001) &&
-       (fabs(Hj(0, 1) - 0.894427) < 0.00001) &&
-       (fabs(Hj(0, 2) - 0) < 0.00001) &&
-       (fabs(Hj(0, 3) - 0) < 0.00001) &&
-       (fabs(Hj(1, 0) - (-0.4)) < 0.00001) &&
-       (fabs(Hj(1, 1) - 0.2) < 0.00001) &&
-       (fabs(Hj(1, 2) - 0) < 0.00001) &&
-       (fabs(Hj(1, 3) - 0) < 0.00001) &&
-       (fabs(Hj(2, 0) - (-0.0178885)) < 0.00001) &&
-       (fabs(Hj(2, 1) - 0.00894427) < 0.00001) &&
-       (fabs(Hj(2, 2) - 0.447214) < 0.00001) &&
-       (fabs(Hj(2, 3) - 0.894427) < 0.00001))) {
-    bCorrect = false;
-  }
-
-  if (bCorrect) {
-      std::cout << "Tools::CalculateRMSE is correct." << std::endl;
-  } else {
-      std::cout << "Tools::CalculateRMSE is wrong." << std::endl;
-  }
-
-  return 0;
-}
-
-int main2() {
-  UnitTest();
-}
-
-int main() {
   uWS::Hub h;
 
   // Create a Kalman Filter instance
-  FusionEKF fusionEKF;
+  FusionEKF* pFusionEKF;
+  if (bUseUKF) {
+    pFusionEKF = new FusionUKF();
+  } else {
+    pFusionEKF = new FusionEKF();
+  }
 
   // used to compute the RMSE later
   Tools tools;
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
 
-  h.onMessage([&fusionEKF,&tools,&estimations,&ground_truth]
+  h.onMessage([pFusionEKF,&tools,&estimations,&ground_truth]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -226,17 +125,17 @@ int main() {
           ground_truth.push_back(gt_values);
           
           // Call ProcessMeasurement(meas_package) for Kalman filter
-          fusionEKF.ProcessMeasurement(meas_package);       
+          pFusionEKF->ProcessMeasurement(meas_package);       
 
           // Push the current estimated x,y positon from the Kalman filter's 
           //   state vector
 
           VectorXd estimate(4);
 
-          double p_x = fusionEKF.ekf_.x_(0);
-          double p_y = fusionEKF.ekf_.x_(1);
-          double v1  = fusionEKF.ekf_.x_(2);
-          double v2 = fusionEKF.ekf_.x_(3);
+          double p_x = pFusionEKF->GetPx();
+          double p_y = pFusionEKF->GetPy();
+          double v1  = pFusionEKF->GetVx();
+          double v2 = pFusionEKF->GetVy();
 
           estimate(0) = p_x;
           estimate(1) = p_y;
