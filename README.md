@@ -1,7 +1,7 @@
 # Extended Kalman Filter Project Starter Code
 Self-Driving Car Engineer Nanodegree Program
 
-In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
+In this project, utilize a kalman filter is utilized to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
 
 This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases).
 
@@ -15,35 +15,20 @@ Once the install for uWebSocketIO is complete, the main program can be built and
 4. make
 5. ./ExtendedKF
 
-Tips for setting up your environment can be found in the classroom lesson for this project.
+Beside the Kalman filter and the extended Kalman filter with CV (**C**onstant **V**elocity) model required in the project. I have also implemented the unscented Kalman filter with CTRV (**C**onstant **T**urn **R**ate and **V**elocity magnitude) model. The result is shown in the final section.
 
-Note that the programs that need to be written to accomplish the project are src/FusionEKF.cpp, src/FusionEKF.h, kalman_filter.cpp, kalman_filter.h, tools.cpp, and tools.h
+## File Description
 
-The program main.cpp has already been filled out, but feel free to modify it.
-
-Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
-
-
-**INPUT**: values provided by the simulator to the c++ program
-
-["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
-
-
-**OUTPUT**: values provided by the c++ program to the simulator
-
-["estimate_x"] <= kalman filter estimated position x
-
-["estimate_y"] <= kalman filter estimated position y
-
-["rmse_x"]
-
-["rmse_y"]
-
-["rmse_vx"]
-
-["rmse_vy"]
-
----
+|Files|Description|
+|:----|:----------|
+|`src/main.cpp`|1. Communicates with the Term 2 Simulator receiving data measurements. <br /> 2. Call functions to run the Kalman filter.  <br /> 3. Call functions to calculate RMSE.|
+|`src/FusionEKF.h` <br /> `src/FusionEKF.cpp`|Class to handle the extended Kalman filter.|
+|`src/FusionUKF.h` <br /> `src/FusionUKF.cpp`|Class to handle the unscented Kalman filter (C).|
+|`src/FusionKF.h` <br /> `src/FusionKF.cpp`|Generic class of FusionEKF and FusionUKF|
+|`src/kalman_filter.h` <br /> `src/kalman_filter.cpp`|Implementation of the Kalman filter and the extended Kalman filter.|
+|`src/unscented_kalman_filter.h` <br /> `src/unscented_kalman_filter.cpp`|Implementation of the unscented Kalman filter.|
+|`src/tools.h` <br /> `src/tools.cpp`|Helper function to calculate RMSE and the Jacobian matrix.|
+|`src/measurement_package.h`|Class for measurements.|
 
 ## Other Important Dependencies
 
@@ -66,69 +51,52 @@ Here is the main protocol that main.cpp uses for uWebSocketIO in communicating w
    * On windows, you may need to run: `cmake .. -G "Unix Makefiles" && make`
 4. Run it: `./ExtendedKF `
 
-## Editor Settings
+## Basic Run Instructions
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+|Command|Description|
+|:------|:----------|
+|`./ExtendedKF EKF`|Using extended Kalman filter with both radar and Lidar measurement.|
+|`./ExtendedKF EKF Radar-Only`|Using extended Kalman filter with radar measurement only.|
+|`./ExtendedKF EKF Laser-Only`|Using extended Kalman filter with Lidar measurement only.|
+|`./ExtendedKF UKF`|Using unscented Kalman filter with both radar and Lidar measurement.|
+|`./ExtendedKF UKF Radar-Only`|Using unscented Kalman filter with radar measurement.|
+|`./ExtendedKF UKF Laser-Only`|Using unscented Kalman filter with Lidar measurement.|
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+## Result and Discussions
 
-## Code Style
+Several experiments were performed under different situations.
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+### Dataset 1
 
-## Generating Additional Data
+|Implementation|RMS Error of Position X|RMS Error of Position Y|RMS Error of Velocity X|RMS Error of Velocity X|
+|:------|:------:|:------:|:------:|:------:|
+|Extended Kalman filter|0.0975|0.0854|0.4185|0.4790|
+|Extended Kalman filter with radar measurement only|0.2339|0.3357|0.5575|0.7430|
+|Extended Kalman filter with Lidar measurement only|0.1886|0.1541|0.7396|0.4737|
+|Unscented Kalman filter|0.0748|0.0844|0.3525|0.2407|
+|Unscented Kalman filter with radar measurement only|0.2230|0.3041|0.4348|0.3681|
+|Unscented Kalman filter with Lidar measurement only|0.1761|0.1475|0.6249|0.2655|
 
-This is optional!
+For Dataset 1, the unscented Kalman filter with CTRV model performed better than the extnded Kalman filter with CV model in all situtaions.
 
-If you'd like to generate your own radar and lidar data, see the
-[utilities repo](https://github.com/udacity/CarND-Mercedes-SF-Utilities) for
-Matlab scripts that can generate additional data.
+The Kalman filters with Lidar measurement performed better than the Kalman filter with radar measurement.
 
-## Project Instructions and Rubric
+The Kalman filters with all types of measurement performed much better than the Kalman filter with either one of measurements.
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+### Dataset 2
 
-More information is only accessible by people who are already enrolled in Term 2 (three-term version) or Term 1 (two-term version)
-of CarND. If you are enrolled, see the Project Resources page in the classroom
-for instructions and the project rubric.
+|Implementation|RMS Error of Position X|RMS Error of Position Y|RMS Error of Velocity X|RMS Error of Velocity X|
+|:------|:------:|:------:|:------:|:------:|
+|Extended Kalman filter|0.0735|0.0975|0.5126|0.4699|
+|Extended Kalman filter with radar measurement only|0.2437|0.3372|0.6682|0.7880|
+|Extended Kalman filter with Lidar measurement only|0.1667|0.1404|0.5216|0.3028|
+|Unscented Kalman filter|0.0919|0.0784|0.6652|0.3239|
+|Unscented Kalman filter with radar measurement only|0.3847|0.3287|0.6522|0.3989|
+|Unscented Kalman filter with Lidar measurement only|0.1667|0.1404|0.5216|0.3028|
 
-## Hints and Tips!
+For Dataset 2, it is quite strange that the unscented Kalman filter with CTRV model did not perform better than the extnded Kalman filter with CV model.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-* Students have reported rapid expansion of log files when using the term 2 simulator.  This appears to be associated with not being connected to uWebSockets.  If this does occur,  please make sure you are conneted to uWebSockets. The following workaround may also be effective at preventing large log files.
+Similar to Dataset 1, The Kalman filters with Lidar measurement performed better than the Kalman filter with radar measurement.
 
-    + create an empty log file
-    + remove write permissions so that the simulator can't write to log
- * Please note that the ```Eigen``` library does not initialize ```VectorXd``` or ```MatrixXd``` objects with zeros upon creation.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
-
-However! We'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Regardless of the IDE used, every submitted project must
-still be compilable with cmake and make.
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Similar to Dataset 1, The Kalman filters with all types of measurement performed much better than the Kalman filter with either one of measurements.
 
